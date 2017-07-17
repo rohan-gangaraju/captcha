@@ -28,7 +28,7 @@ def getImgData() :
 
 # Method to make multiple calls to the Umass site, fetch the base64 png data and write the data to a csv file
 def writeCaptchaToCSV() :
-	with open('C:\\Users\\rg\\Desktop\\pyscripts\\pycaptcha.csv', 'a') as captchaFile:
+	with open('pycaptcha.csv', 'a') as captchaFile:
 		for i in range(0,5000) :
 			print(i)
 			writer = csv.writer(captchaFile);
@@ -36,7 +36,7 @@ def writeCaptchaToCSV() :
 		
 # Method to convert the base64 encodings into PNG's which can be later read as pixel data
 def convertBase64ToPng() :
-	with open('C:\\Users\\rg\\Desktop\\pyscripts\\captcha\\pycaptcha.csv', 'r') as captchaFile:
+	with open('pycaptcha.csv', 'r') as captchaFile:
 		i = 1
 		for line in captchaFile:
 			
@@ -44,7 +44,7 @@ def convertBase64ToPng() :
 				data = line.strip().split(',')
 				#print(data[1])
 				
-				path = "C:\\Users\\rg\\Desktop\\pyscripts\\captcha\\images\\"
+				path = "images\\"
 				file = path + str(i) + ".png"
 				print(file)
 				with open(file, "wb") as fh:
@@ -55,7 +55,7 @@ def convertBase64ToPng() :
 # Method to read entire captcha image, filter and split it into 4 parts and save the images under respective character folder based on the class.txt file which contains the classification details
 def saveClassfiedImages() :
 	# Path of classified images
-	parent_path = 'C:\\Users\\Administrator\\Desktop\\pyscripts\\captcha\\classified\\'
+	parent_path = 'classified\\'
 
 	captcha_value_list = []
 
@@ -202,7 +202,7 @@ def splitImage(image) :
 
 def saveClassfiedImagesCluster() :
 	# Path of classified images
-	parent_path = 'C:\\Users\\Administrator\\Desktop\\pyscripts\\captcha\\classified\\'
+	parent_path = 'classified\\'
 
 	captcha_value_list = []
 

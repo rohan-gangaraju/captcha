@@ -59,7 +59,7 @@ def processInput(narray) :
 	return inputX, modifiedY
 	
 def train() :
-	narray = readFromFile('C:\\Users\\Administrator\\Desktop\\pyscripts\\captcha\\processed_input.csv')
+	narray = readFromFile('processed_input.csv')
 	np.random.shuffle(narray)
 	X, Y = processInput(narray)
 		
@@ -67,7 +67,7 @@ def train() :
 	nn.train(X, Y, learning_rate=0.1, number_of_hidden_layers=1, number_of_hidden_nodes=2700, number_of_output_nodes=5, total_iterations=50000, print_error_iters=10, saveAtInterval=True, forceTrain=True)
 	
 def trainCluster() :
-	narray = readFromFile('C:\\Users\\Administrator\\Desktop\\pyscripts\\captcha\\processed_input_cluster.csv')
+	narray = readFromFile('processed_input_cluster.csv')
 	np.random.shuffle(narray)
 	X, Y = processInput(narray)
 		
@@ -76,7 +76,7 @@ def trainCluster() :
 	return nn
 	
 def test() :
-	test_folder = 'C:\\Users\\Administrator\\Desktop\\pyscripts\\captcha\\classified\\testimages'
+	test_folder = 'classified\\testimages'
 	testNN = nl.NN().readNNModel('new_model.pkl')
 	
 
@@ -166,14 +166,14 @@ def test() :
 	
 def testCluster() :
 	print("Test cluster")
-	train_folder = 'C:\\Users\\Administrator\\Desktop\\pyscripts\\captcha\\classified\\testimages'
+	train_folder = 'classified\\testimages'
 	
 
 	testNN = nl.NN().readNNModel('temp_data.pkl')
 	
 	captcha_value_list = []
 
-	with open("C:\\Users\\Administrator\\Desktop\\pyscripts\\captcha\\classified\\testclass.txt","r") as classFile:
+	with open("classified\\testclass.txt","r") as classFile:
 		for line in classFile:
 			captcha_value_list.append(line.strip())
 	
@@ -232,12 +232,12 @@ def testCluster() :
 	
 	
 def validateModel() :
-	train_folder = 'C:\\Users\\Administrator\\Desktop\\pyscripts\\captcha\\classified\\fullimages'
+	train_folder = 'classified\\fullimages'
 	testNN = nl.NN().readNNModel('new_model.pkl')
 	
 	captcha_value_list = []
 
-	with open("C:\\Users\\Administrator\\Desktop\\pyscripts\\captcha\\classified\\class.txt","r") as classFile:
+	with open("classified\\class.txt","r") as classFile:
 		for line in classFile:
 			captcha_value_list.append(line.strip())
 	
@@ -318,14 +318,14 @@ def validateModel() :
 	
 def validateCluster(testNN) :
 	print("Validating")
-	train_folder = 'C:\\Users\\Administrator\\Desktop\\pyscripts\\captcha\\classified\\fullimages'
+	train_folder = 'classified\\fullimages'
 	
 	if testNN is None:
 		testNN = nl.NN().readNNModel('temp_data.pkl')
 	
 	captcha_value_list = []
 
-	with open("C:\\Users\\Administrator\\Desktop\\pyscripts\\captcha\\classified\\class.txt","r") as classFile:
+	with open("classified\\class.txt","r") as classFile:
 		for line in classFile:
 			captcha_value_list.append(line.strip())
 	
@@ -387,14 +387,14 @@ def validateModelAgainstTrainingSet() :
 	
 	captcha_value_list = []
 
-	with open("C:\\Users\\Administrator\\Desktop\\pyscripts\\captcha\\classified\\class.txt","r") as classFile:
+	with open("classified\\class.txt","r") as classFile:
 		for line in classFile:
 			captcha_value_list.append(line.strip())
 	
 	accuracy_count = 0
 	total_count = 0
 	#train_folder = 'C:\\Users\\Administrator\\Desktop\\pyscripts\\captcha\\classified\\testimages'
-	train_folder = 'C:\\Users\\Administrator\\Desktop\\pyscripts\\captcha\\classified\\fullimages'
+	train_folder = 'classified\\fullimages'
 	for file in listdir(train_folder) :
 		print("File ", file)
 		index = int((file.split('.'))[0])-1
@@ -464,7 +464,7 @@ def validateModelAgainstDividedTrainingSet() :
 	testNN = nl.NN().readNNModel('model_99.pkl')
 	
 
-	train_folder = 'C:\\Users\\Administrator\\Desktop\\pyscripts\\captcha\\classified\\divided'
+	train_folder = 'classified\\divided'
 	#train_folder = 'C:\\Users\\Administrator\\Desktop\\pyscripts\\captcha\\images'
 	
 	for folder in listdir(train_folder) :

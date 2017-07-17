@@ -8,8 +8,8 @@ import csv
 
 
 def processAllImages() :
-	classified_folder = 'C:\\Users\\Administrator\\Desktop\\pyscripts\\captcha\\classified\\divided'
-	csv_file = 'C:\\Users\\Administrator\\Desktop\\pyscripts\\captcha\\processed_input.csv'
+	classified_folder = 'classified\\divided'
+	csv_file = 'processed_input.csv'
 	with open(csv_file, 'a') as captchaFile:
 		writer = csv.writer(captchaFile);
 		for dir in listdir(classified_folder) :
@@ -31,8 +31,8 @@ def processAllImages() :
 				#input()
 
 def processAllImagesCluster() :
-	classified_folder = 'C:\\Users\\Administrator\\Desktop\\pyscripts\\captcha\\classified\\dividedCluster'
-	csv_file = 'C:\\Users\\Administrator\\Desktop\\pyscripts\\captcha\\processed_input_cluster.csv'
+	classified_folder = 'classified\\dividedCluster'
+	csv_file = 'processed_input_cluster.csv'
 	with open(csv_file, 'a') as captchaFile:
 		writer = csv.writer(captchaFile);
 		for dir in listdir(classified_folder) :
