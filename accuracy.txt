@@ -1,0 +1,17 @@
+Error - 7%
+2700 hidden neurons 
+Test set accuracy - char correct count  192  : char total_count  404  captcha correct count  5  percent  47.524752475247524
+
+
+Error - 7%
+1800 hidden neurons 
+Training set accuracy - char correct count  1692  : char total_count  2000  captcha correct count  264  percent  84.6
+Test set accuracy - char correct count  203  : char total_count  404  captcha correct count  7  percent  50.24752475247525
+
+Error 17%
+1000 hidden neurons 
+Training set accuracy - char correct count  1344  : char total_count  2000  captcha correct count  119  percent  67.2
+Test set accuracy - char correct count  199  : char total_count  404  captcha correct count  8  percent  49.257425742574256
+
+Error 13%
+Test set accuracy - char correct count  209  : char total_count  404  captcha correct count  8  percent  51.73267326732673
