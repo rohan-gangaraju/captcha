@@ -70,9 +70,10 @@ def trainCluster() :
 	narray = readFromFile('processed_input_cluster.csv')
 	np.random.shuffle(narray)
 	X, Y = processInput(narray)
-		
+	hidden_layer_array = [1800]
+	
 	nn = nl.NN()
-	nn.train(X, Y, learning_rate=0.05, number_of_hidden_layers=1, number_of_hidden_nodes=1800, number_of_output_nodes=5, total_iterations=50000, print_error_iters=10, saveAtInterval=True, forceTrain=True)
+	nn.train(X, Y, hidden_layer_array, learning_rate=0.1, number_of_output_nodes=5, total_iterations=50000, print_error_iters=10, saveAtInterval=True, forceTrain=True)
 	return nn
 	
 def test() :

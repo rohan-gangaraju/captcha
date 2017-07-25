@@ -26,8 +26,8 @@ class NN :
 		self.number_of_instances = 0
 		self.number_of_input_nodes = 0
 		self.number_of_hidden_layers = 0
-		self.number_of_number_of_hidden_nodes = 0
-		self.number_of_number_of_output_nodes = 0
+		self.number_of_hidden_nodes_array = []
+		self.number_of_output_nodes = 0
 		self.total_iterations = 0
 		
 		self.print_error_iters = 0
@@ -39,15 +39,18 @@ class NN :
 	def derive(self, x) :
 		return self.activate(x) * (1-self.activate(x))
 
-	def init_neurons(self, number_of_instances, number_of_input_nodes, learning_rate=0.01, number_of_hidden_layers=1, number_of_hidden_nodes=4, number_of_output_nodes=1, total_iterations=50000, print_error_iters=1000) : 
+	def init_neurons(self, number_of_instances, number_of_input_nodes, hidden_layer_array, learning_rate=0.01, number_of_output_nodes=1, total_iterations=50000, print_error_iters=1000) : 
 		
 		self.number_of_instances = number_of_instances
 		self.number_of_input_nodes = number_of_input_nodes
-		self.number_of_number_of_hidden_nodes = number_of_hidden_nodes
-		self.number_of_number_of_output_nodes = number_of_output_nodes
+		self.number_of_output_nodes = number_of_output_nodes
 		
 		self.learning_rate = learning_rate
-		self.number_of_hidden_layers = number_of_hidden_layers
+		self.number_of_hidden_layers = len(hidden_layer_array)
+		
+		for i in range(0,self.number_of_hidden_layers) :
+			self.number_of_hidden_nodes_array.append(hidden_layer_array[i])
+			
 		self.total_iterations = total_iterations
 		self.print_error_iters = print_error_iters
 		
@@ -58,16 +61,21 @@ class NN :
 		
 		print("Number of instances ( m ) ", self.number_of_instances)
 		print("Number of input nodes ( n ) ", self.number_of_input_nodes)
-		print("Number of hidden nodes ( h ) ", self.number_of_number_of_hidden_nodes)
-		print("Number of output nodes ( r ) ", self.number_of_number_of_output_nodes)
+		
+		for i in range(0,self.number_of_hidden_layers) :
+			print("Hidden Layer ", i+1, " : Number of hidden nodes ( h ) ", self.number_of_hidden_nodes_array[i])
+		
+		print("Number of output nodes ( r ) ", self.number_of_output_nodes)
 
 		m = self.number_of_instances
 		n = self.number_of_input_nodes
-		h = self.number_of_number_of_hidden_nodes
-		r = self.number_of_number_of_output_nodes
+		r = self.number_of_output_nodes
 				
 		self.layers.append(layer(m,n))	# First layer ( L0 ) with ( n ) neurons and ( m ) instances
-		self.layers.append(layer(m,h))	# Hidden layer ( L1 ) with ( h ) neurons and ( m ) instances
+		
+		for i in range(0,self.number_of_hidden_layers) :
+			self.layers.append(layer(m,self.number_of_hidden_nodes_array[i]))	# Hidden layer ( Li ) with ( h ) neurons and ( m ) instances
+			
 		self.layers.append(layer(m,r))	# Output layer ( L2 ) with ( r ) neurons and ( m ) instances
 
 		for i in range(0, len(self.layers)) :
@@ -104,9 +112,10 @@ class NN :
 		
 		#input()
 
-	def train(self, inputX, inputY, learning_rate=0.01, number_of_hidden_layers=1, number_of_hidden_nodes=4, number_of_output_nodes=1, total_iterations=50000, print_error_iters=1000, saveAtInterval=False, forceTrain=False) :
+	def train(self, inputX, inputY, hidden_layer_array, learning_rate=0.01, number_of_output_nodes=1, total_iterations=50000, print_error_iters=1000, saveAtInterval=False, forceTrain=False) :
 
 		#existing_self = self.readNNModel()
+		existing_self = None
 		
 		X = np.c_[inputX, np.ones(len(inputX))]	# Modify the input array and add an additional column of 1's for bias
 		Y = inputY
@@ -116,7 +125,7 @@ class NN :
 		
 		currentIteration = 0
 		if forceTrain == True or existing_self is None or existing_self.currentIteration == 0 :
-			self.init_neurons(number_of_instances, number_of_input_nodes, learning_rate, number_of_hidden_layers, number_of_hidden_nodes, number_of_output_nodes, total_iterations, print_error_iters)
+			self.init_neurons(number_of_instances, number_of_input_nodes, hidden_layer_array, learning_rate, number_of_output_nodes, total_iterations, print_error_iters)
 			self.layers[0].narray = X	# Initially set the first layer ( L0 ) to the input matrix ( X )
 		else :
 			self = existing_self
@@ -215,8 +224,8 @@ def exampleRun() :
 			 [0]])
 
 	number_of_output_nodes = 1
-	number_of_hidden_layers = 1
-	number_of_hidden_nodes = 4
+	hidden_layer_array = [4,2]
+	print(len(hidden_layer_array))
 	
 	learning_rate = 0.9
 	total_iterations = 50000
@@ -224,7 +233,7 @@ def exampleRun() :
 	
 	trainNN = NN()
 	
-	trainNN = trainNN.train(X, Y, learning_rate, number_of_hidden_layers, number_of_hidden_nodes, number_of_output_nodes, total_iterations, print_error_iters, saveAtInterval=True, forceTrain=False)
+	trainNN = trainNN.train(X, Y, hidden_layer_array, learning_rate, number_of_output_nodes, total_iterations, print_error_iters, saveAtInterval=True, forceTrain=False)
 			
 	print("Final value of Output Layer " , trainNN.getFinalLayerOutput())
 	
