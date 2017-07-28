@@ -112,6 +112,11 @@ class NN :
 		
 		#input()
 
+	def unison_shuffled_copies(self, a, b):
+		from sklearn.utils import shuffle
+		s_a, s_b = shuffle(a, b, random_state=0)
+		return s_a,s_b
+
 	def train(self, inputX, inputY, hidden_layer_array, learning_rate=0.01, number_of_output_nodes=1, total_iterations=50000, print_error_iters=1000, saveAtInterval=False, forceTrain=False) :
 
 		#existing_self = self.readNNModel()
@@ -135,10 +140,14 @@ class NN :
 		start_time = time.perf_counter()
 		constant_iterations = 0
 		for j in range(currentIteration, total_iterations) :
+			# Shuffling training data after each epoch
+			self.unison_shuffled_copies(self.layers[0].narray, Y)
+			
 			self.forward_propagate()
 			self.backward_propagate(Y)
 			if(j % print_error_iters) == 0:   # Only #print the error every 10000 steps, to save time and limit the amount of output. 
 				error_percent = np.mean(np.abs(self.layers[-1].error)) * 100
+				'''
 				if error_percent < 10 :
 					self.learning_rate = 0.01
 					print("Changing learning_rate to : ", self.learning_rate)
@@ -146,6 +155,7 @@ class NN :
 					self.learning_rate = (self.learning_rate/2)
 					constant_iterations = 0
 					print("Changing learning_rate to : ", self.learning_rate)
+				'''
 				elapsed_time = time.perf_counter() - start_time
 				start_time = time.perf_counter()
 				print("Error === %0.2f " % error_percent, " === iterations ", str(j), " === Percentage training completed %0.2f" % ((j/total_iterations)*100), " === Elapsed time %0.2f" % elapsed_time)
