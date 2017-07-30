@@ -53,27 +53,34 @@ def processInput(narray) :
 	modifiedY = []
 
 	for i in range(0,len(inputY)) : 
-		#print(inputY)
-		modifiedY.append(numdict[inputY[i][0]])
+		character = chr(inputY[i]);
+		print("char : ", character)
+		
+		class_img_path = "classified\\image_classes"
+		img = cv2.imread(join(class_img_path, character, "0.png"),0)
+		
+		rows = 60
+		cols = 45
+		
+		dst = cv2.fastNlMeansDenoising(img, None, 45, 7, 21)
+		thresh, im_bw = cv2.threshold(dst, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+
+		bw_array = im_bw.flatten()
+		
+		bw_array[bw_array > 250] = 1
+		
+		modifiedY.append(bw_array)
 		
 	return inputX, modifiedY
-	
-def train() :
-	narray = readFromFile('processed_input.csv')
-	np.random.shuffle(narray)
-	X, Y = processInput(narray)
 		
-	nn = nl.NN()
-	nn.train(X, Y, learning_rate=0.1, number_of_hidden_layers=1, number_of_hidden_nodes=2700, number_of_output_nodes=5, total_iterations=50000, print_error_iters=10, saveAtInterval=True, forceTrain=True)
-	
 def trainCluster() :
 	narray = readFromFile('processed_input_cluster.csv')
-	np.random.shuffle(narray)
+	#np.random.shuffle(narray)
 	X, Y = processInput(narray)
-	hidden_layer_array = [1800]
+	hidden_layer_array = [2700]
 	
 	nn = nl.NN()
-	nn.train(X, Y, hidden_layer_array, learning_rate=0.1, number_of_output_nodes=5, total_iterations=50000, print_error_iters=10, saveAtInterval=True, forceTrain=True)
+	nn.train(X, Y, hidden_layer_array, learning_rate=0.1, number_of_output_nodes=len(Y[0]), total_iterations=50000, print_error_iters=10, saveAtInterval=True, forceTrain=True)
 	return nn
 	
 def test() :
