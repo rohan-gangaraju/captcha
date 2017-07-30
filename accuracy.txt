@@ -15,3 +15,48 @@ Test set accuracy - char correct count  199  : char total_count  404  captcha co
 
 Error 13%
 Test set accuracy - char correct count  209  : char total_count  404  captcha correct count  8  percent  51.73267326732673
+
+-------------------------------------------------------------------------------------------------------
+With 1800 hidden neurons and 0.1 learning rate : caused overfitting. Provided better results on testcluster when the error on training was more.
+
+Error === 0.27   === iterations  49800  === Percentage training completed 99.60  === Elapsed time 18.01
+Error === 0.26   === iterations  49810  === Percentage training completed 99.62  === Elapsed time 17.49
+Saving to file  temp_data.pkl
+
+Traincluster
+
+char correct count  1992  : char total_count  1992  captcha correct count  498  percent  100.0
+Predicted   M4GD
+Correct     M4GD
+char correct count  1996  : char total_count  1996  captcha correct count  499  percent  100.0
+Predicted   B54A
+Correct     B54A
+char correct count  2000  : char total_count  2000  captcha correct count  500  percent  100.0
+
+TestCluster
+
+char correct count  220  : char total_count  396  captcha correct count  14  percent  55.55555555555556
+Predicted   6XR4
+Correct     7NR4
+char correct count  222  : char total_count  400  captcha correct count  14  percent  55.50000000000001
+Predicted   P7DA
+Correct     P7CA
+char correct count  225  : char total_count  404  captcha correct count  14  percent  55.693069306930695
+
+
+==========================================================
+
+Image class
+
+1 layer 2700 hidden nodes
+
+char correct count  332  : char total_count  396  captcha correct count  57  percent  83.83838383838383
+Predicted   TNR4
+Correct     7NR4
+char correct count  335  : char total_count  400  captcha correct count  57  percent  83.75
+Predicted   P7CA
+Correct     P7CA
+char correct count  339  : char total_count  404  captcha correct count  58  percent  83.9108910891089
+
+
+
