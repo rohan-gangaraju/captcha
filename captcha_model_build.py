@@ -353,6 +353,8 @@ def validateCluster(testNN) :
 		
 		for i in range(0,4) :
 			#pdb.set_trace()
+			print("Correct    " , captcha_value_list[index])
+			
 			cur_img = x[i]			
 			
 			bw_array = cur_img.flatten()
@@ -363,6 +365,13 @@ def validateCluster(testNN) :
 
 			output = testNN.testInstance(test_array)
 			
+			output[output > 0] = 255
+
+			img = np.reshape(output, (60,45))
+			
+			cv2.imshow("some", img)
+			cv2.waitKey()
+			'''
 			#print(output.round())
 			char = "NULL"
 			for key, value in numdict.items():
@@ -389,6 +398,7 @@ def validateCluster(testNN) :
 		#input()
 	
 		print ( "char correct count " , accuracy_count , " : char total_count " , total_count , " captcha correct count ", captcha_correct_count, " percent " , (accuracy_count/total_count)*100)
+		'''
 	
 def validateModelAgainstTrainingSet() :
 	testNN = nl.NN().readNNModel('model_99.pkl')
