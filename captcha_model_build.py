@@ -14,6 +14,8 @@ import captcha_pre_process as cpp
 #using dill instead of pickle because it has issues saving large files
 import dill
 
+import time
+
 #np.set_printoptions(threshold=np.inf) #setting this may cause program to hang while trying to print some array
 
 def readFromFile(file) :
@@ -318,15 +320,17 @@ def validate_train(testNN) :
 		
 		print (summary_string)
 		
-def test(png_file) :
-	print("Test")
+def test(trained_model, png_file) :
+	start_time = time.perf_counter()
+	print("Classify using trained model")
 	
 	# Get the mapping between class character and image array { '2' : [1,0,...], '3' : [0,0,..], ... }
 	# Since we do not want to get this information from the images again, assuming that this pickle file is already present
 	img_class_dict = getImageClassDict()
 		
 	# Read trained model
-	testNN = nl.NN().readNNModel('temp_data.pkl')
+	if trained_model is None :
+		trained_model = nl.NN().readNNModel('temp_data.pkl')
 		
 	# Read image
 	print("Reading image file ", png_file)
@@ -347,7 +351,7 @@ def test(png_file) :
 		test_array[test_array > 0] = 1
 		
 		# Predict the output character using the NN model
-		output = testNN.testInstance(test_array)
+		output = trained_model.testInstance(test_array)
 		
 		output[output < 1] = 0
 		
@@ -372,6 +376,9 @@ def test(png_file) :
 		
 		captcha_str += output_char
 		
+	elapsed_time = time.perf_counter() - start_time
+	print("time to classify : %0.2f " % elapsed_time)
+	
 	return captcha_str
 		
 if __name__ == "__main__":
