@@ -11,11 +11,28 @@ import sys
 
 import captcha_pre_process as cpp
 
+#using dill instead of pickle because it has issues saving large files
+import dill
+
 #np.set_printoptions(threshold=np.inf) #setting this may cause program to hang while trying to print some array
 
 def readFromFile(file) :
 	return np.genfromtxt(file, delimiter=",")
 	
+# helper functions to pickle 
+
+def dill_save_obj(name, obj):
+    with open(name + '.pkl', 'wb') as f:
+        dill.dump(obj, f)
+
+def dill_load_obj(name):
+	pkl_file = name + '.pkl'
+	if exists(pkl_file) :
+		with open(pkl_file, 'rb') as f:
+			return dill.load(f)
+	else :
+		return None
+		
 def processInput(narray) :
 	'''
 		narray - [50, 0, 0, 0, 1, 1, .....]
@@ -51,25 +68,34 @@ def processInput(narray) :
 	return inputX, modifiedY
 		
 def getImageClassDict() :
-	img_class_dict = {}
+	imageClassDictionaryFile = "image_class_dictionary"
 	
-	train_images_path = join("classified", "image_classes")
-
-	onlyfiles = [f for f in listdir(train_images_path)]
-
-	for file in onlyfiles :
-		img_path = join(train_images_path, file, "0.png");
-		img = cv2.imread(img_path,0)
+	saved_img_class_dict = dill_load_obj(imageClassDictionaryFile)
+	if saved_img_class_dict is not None :
+		return saved_img_class_dict
 		
-		dst = cv2.fastNlMeansDenoising(img, None, 45, 7, 21)
-		thresh, im_bw = cv2.threshold(dst, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+	else :
+		img_class_dict = {}
+		
+		train_images_path = join("classified", "image_classes")
 
-		bw_array = im_bw.flatten()
-		
-		bw_array[bw_array > 250] = 1
-		bw_array[bw_array < 1] = 0
-		
-		img_class_dict[file] = bw_array
+		onlyfiles = [f for f in listdir(train_images_path)]
+
+		for file in onlyfiles :
+			img_path = join(train_images_path, file, "0.png");
+			img = cv2.imread(img_path,0)
+			
+			dst = cv2.fastNlMeansDenoising(img, None, 45, 7, 21)
+			thresh, im_bw = cv2.threshold(dst, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+
+			bw_array = im_bw.flatten()
+			
+			bw_array[bw_array > 250] = 1
+			bw_array[bw_array < 1] = 0
+			
+			img_class_dict[file] = bw_array
+	
+		dill_save_obj(imageClassDictionaryFile, img_class_dict)
 		
 	return img_class_dict
 	
@@ -92,8 +118,8 @@ def train() :
 	test()
 	return nn
 
-def test() :
-	print("Testing model")
+def validate_test() :
+	print("Test set validation")
 	
 	train_folder = join("classified", "testimages")
 	
@@ -191,8 +217,8 @@ def test() :
 		
 		print (summary_string)
 
-def validate(testNN) :
-	print("Validating using the training set")
+def validate_train(testNN) :
+	print("Validate training set")
 	
 	# Get the mapping between class character and image array { '2' : [1,0,...], '3' : [0,0,..], ... }
 	img_class_dict = getImageClassDict()
@@ -292,12 +318,70 @@ def validate(testNN) :
 		
 		print (summary_string)
 		
+def test(png_file) :
+	print("Test")
+	
+	# Get the mapping between class character and image array { '2' : [1,0,...], '3' : [0,0,..], ... }
+	# Since we do not want to get this information from the images again, assuming that this pickle file is already present
+	img_class_dict = getImageClassDict()
+		
+	# Read trained model
+	testNN = nl.NN().readNNModel('temp_data.pkl')
+		
+	# Read image
+	img = cv2.imread(png_file,0)
+	
+	x = cpp.splitImage(img)
+
+	captcha_str = ""
+	
+	# Divide the 4 character captcha into each character and use the NN model to predict each character
+	for i in range(0,4) :
+		cur_img = x[i]			
+		
+		bw_array = cur_img.flatten()
+		
+		test_array = np.append(bw_array,[1])
+		
+		test_array[test_array > 0] = 1
+		
+		# Predict the output character using the NN model
+		output = testNN.testInstance(test_array)
+		
+		output[output < 1] = 0
+		
+		match_sum = 0
+		output_char = "NULL"
+
+		# Simple array comparison between predicted output activation array and the image class array which is already collected the image dict
+		for key,value in img_class_dict.items() :
+			match_count = np.sum(output == value)
+			if match_count > match_sum :
+				output_char = key
+				match_sum = match_count
+
+		'''
+			# Uncomment to see the character image that is generated using the NN model
+			
+			output[output == 1] = 255
+			img = np.reshape(output, (60,45))
+			cv2.imshow("some", img)
+			cv2.waitKey()
+		'''
+		
+		captcha_str += output_char
+		
+	return captcha_str
+		
 if __name__ == "__main__":
 	action = sys.argv[1]
 	#print(action)
 	if action == "train" :
 		train()
-	elif action == "validate":
-		validate(None)
-	elif action == "test" :
-		test()
+	elif action == "validate_train":
+		validate_train(None)
+	elif action == "validate_test" :
+		validate_test()
+	elif action=="test":
+		test(join("classified","testimages","1000.png"))
+		

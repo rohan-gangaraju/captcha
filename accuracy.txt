@@ -166,3 +166,42 @@ Correct     P7CA
 
                         Percentage    : 18.81188118811881
 						
+1 layer 2700 hidden nodes
+
+Min error - 0.5
+
+Predicted   P7CT
+Correct     P7CA
+
+
+                Single Character
+                        Correct count : 327
+                        Total count   : 404
+
+                        Percentage    : 80.94059405940595
+
+                Captcha
+                        Correct count : 53
+                        Total count   : 101
+
+                        Percentage    : 52.475247524752476
+						
+Min error - 1
+
+Predicted   PTCA
+Correct     P7CA
+
+
+                Single Character
+                        Correct count : 317
+                        Total count   : 404
+
+                        Percentage    : 78.46534653465346
+
+                Captcha
+                        Correct count : 41
+                        Total count   : 101
+
+                        Percentage    : 40.5940594059406
+						
+Min error - 0.1
