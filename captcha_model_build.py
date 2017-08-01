@@ -329,6 +329,7 @@ def test(png_file) :
 	testNN = nl.NN().readNNModel('temp_data.pkl')
 		
 	# Read image
+	print("Reading image file ", png_file)
 	img = cv2.imread(png_file,0)
 	
 	x = cpp.splitImage(img)
@@ -383,5 +384,6 @@ if __name__ == "__main__":
 	elif action == "validate_test" :
 		validate_test()
 	elif action=="test":
-		test(join("classified","testimages","1000.png"))
+		output_str = test(join("classified","testimages","1000.png"))
+		print(output_str)
 		
