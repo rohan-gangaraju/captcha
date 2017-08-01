@@ -166,6 +166,10 @@ class NN :
 					constant_iterations = 0
 				else :
 					constant_iterations += print_error_iters
+					
+					
+				if error_percent < 0.5 :
+					break
 			
 		#self.saveCurrentObj()
 		return self

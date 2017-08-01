@@ -58,5 +58,111 @@ Predicted   P7CA
 Correct     P7CA
 char correct count  339  : char total_count  404  captcha correct count  58  percent  83.9108910891089
 
+1 layer 3200 hidden nodes
+
+Predicted   PTCT
+Correct     P7CA
 
 
+                Single Character
+                        Correct count : 293
+                        Total count   : 404
+
+                        Percentage    : 72.52475247524752
+
+                Captcha
+                        Correct count : 39
+                        Total count   : 101
+
+                        Percentage    : 38.613861386138616
+						
+1 layer 1800 hidden nodes
+
+Predicted   PTCT
+Correct     P7CA
+
+
+                Single Character
+                        Correct count : 255
+                        Total count   : 404
+
+                        Percentage    : 63.11881188118812
+
+                Captcha
+                        Correct count : 18
+                        Total count   : 101
+
+                        Percentage    : 17.82178217821782
+
+1 layer 2700 hidden nodes
+
+Predicted   P7CA
+Correct     P7CA
+
+
+                Single Character
+                        Correct count : 335
+                        Total count   : 404
+
+                        Percentage    : 82.92079207920791
+
+                Captcha
+                        Correct count : 57
+                        Total count   : 101
+
+                        Percentage    : 56.43564356435643
+						
+1 layer 2500 hidden nodes
+
+Predicted   PTCT
+Correct     P7CA
+
+
+                Single Character
+                        Correct count : 283
+                        Total count   : 404
+
+                        Percentage    : 70.04950495049505
+
+                Captcha
+                        Correct count : 34
+                        Total count   : 101
+
+                        Percentage    : 33.663366336633665
+						
+1 layer 2800 hidden nodes
+
+Predicted   PTCA
+Correct     P7CA
+
+
+                Single Character
+                        Correct count : 284
+                        Total count   : 404
+
+                        Percentage    : 70.29702970297029
+
+                Captcha
+                        Correct count : 27
+                        Total count   : 101
+
+                        Percentage    : 26.732673267326735
+						
+1 layer 2650 hidden nodes
+
+Predicted   PTCT
+Correct     P7CA
+
+
+                Single Character
+                        Correct count : 238
+                        Total count   : 404
+
+                        Percentage    : 58.91089108910891
+
+                Captcha
+                        Correct count : 19
+                        Total count   : 101
+
+                        Percentage    : 18.81188118811881
+						

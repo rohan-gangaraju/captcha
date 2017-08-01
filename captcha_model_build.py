@@ -79,9 +79,6 @@ def train() :
 	# Read already processed input data
 	narray = readFromFile('processed_input_cluster.csv')
 	
-	# Shuffle data after each epoch
-	#np.random.shuffle(narray)
-	
 	# X indicates the input node activation for each input image and Y indicates the required output node activation indicating the image array for the required class
 	X, Y = processInput(narray)
 	
@@ -92,6 +89,7 @@ def train() :
 	nn = nl.NN()
 	nn.train(X, Y, hidden_layer_array, learning_rate=0.1, number_of_output_nodes=len(Y[0]), total_iterations=50000, print_error_iters=10, saveAtInterval=True, forceTrain=True)
 	
+	test()
 	return nn
 
 def test() :
@@ -294,7 +292,7 @@ def validate(testNN) :
 		
 if __name__ == "__main__":
 	action = sys.argv[1]
-	print(action)
+	#print(action)
 	if action == "train" :
 		train()
 	elif action == "validate":
