@@ -8,7 +8,7 @@ import csv
 
 
 def processAllImages() :
-	classified_folder = 'classified\\divided'
+	classified_folder = join("classified", "divided")
 	csv_file = 'processed_input.csv'
 	with open(csv_file, 'a') as captchaFile:
 		writer = csv.writer(captchaFile);
@@ -31,7 +31,7 @@ def processAllImages() :
 				#input()
 
 def processAllImagesCluster() :
-	classified_folder = 'classified\\dividedCluster'
+	classified_folder = join("classified", "dividedCluster")
 	csv_file = 'processed_input_cluster.csv'
 	with open(csv_file, 'a') as captchaFile:
 		writer = csv.writer(captchaFile);

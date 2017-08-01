@@ -33,7 +33,7 @@ def processInput(narray) :
 		character = chr(inputY[i]);
 		#print("Instance character : ", character)
 		
-		class_img_path = "classified\\image_classes"
+		class_img_path = join("classified","image_classes")
 		img = cv2.imread(join(class_img_path, character, "0.png"),0)
 		
 		rows = 60
@@ -53,7 +53,7 @@ def processInput(narray) :
 def getImageClassDict() :
 	img_class_dict = {}
 	
-	train_images_path = 'classified\\image_classes'
+	train_images_path = join("classified", "image_classes")
 
 	onlyfiles = [f for f in listdir(train_images_path)]
 
@@ -95,7 +95,7 @@ def train() :
 def test() :
 	print("Testing model")
 	
-	train_folder = 'classified\\testimages'
+	train_folder = join("classified", "testimages")
 	
 	# Get the mapping between class character and image array { '2' : [1,0,...], '3' : [0,0,..], ... }
 	img_class_dict = getImageClassDict()
@@ -105,7 +105,8 @@ def test() :
 	
 	captcha_value_list = []
 
-	with open("classified\\testclass.txt","r") as classFile:
+	testclass_path = join("classified", "testclass.txt")
+	with open(testclass_path,"r") as classFile:
 		for line in classFile:
 			captcha_value_list.append(line.strip())
 	
@@ -196,7 +197,7 @@ def validate(testNN) :
 	# Get the mapping between class character and image array { '2' : [1,0,...], '3' : [0,0,..], ... }
 	img_class_dict = getImageClassDict()
 		
-	train_folder = 'classified\\fullimages'
+	train_folder = join("classified", "fullimages")
 	
 	# Read trained model
 	if testNN is None:
@@ -204,7 +205,8 @@ def validate(testNN) :
 	
 	captcha_value_list = []
 
-	with open("classified\\class.txt","r") as classFile:
+	class_file = join("classified", "class.txt")
+	with open(class_file,"r") as classFile:
 		for line in classFile:
 			captcha_value_list.append(line.strip())
 	
