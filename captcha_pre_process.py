@@ -5,6 +5,7 @@ import cv2
 
 from os import listdir, makedirs
 from os.path import join,isfile,exists
+from shutil import rmtree
 
 import base64
 
@@ -204,6 +205,9 @@ def splitImage(image) :
 def saveClassfiedImagesCluster() :
 	# Path of classified images
 	parent_path = 'classified'
+	
+	# Remove existing divided files
+	rmtree(join(parent_path,'dividedCluster'))
 
 	captcha_value_list = []
 

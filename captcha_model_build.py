@@ -132,7 +132,7 @@ def validate_test() :
 	img_class_dict = getImageClassDict()
 		
 	# Read trained model
-	testNN = nl.NN().readNNModel('model.pkl')
+	testNN = nl.NN().readNNModel('full_nn_object.pkl')
 	
 	captcha_value_list = []
 

@@ -221,3 +221,24 @@ Correct     P7CA
                         Total count   : 101
 
                         Percentage    : 63.366336633663366
+						
+Min error - 0.5 
+
+Predicted   P7CA
+Correct     P7CA
+
+
+                Single Character
+                        Correct count : 340
+                        Total count   : 400
+
+                        Percentage    : 85.0
+
+                Captcha
+                        Correct count : 63
+                        Total count   : 100
+
+                        Percentage    : 63.0
+						
+Min error - 0.5 - Dataset increased to 1000 captchas
+
