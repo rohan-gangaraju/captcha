@@ -110,12 +110,15 @@ def train() :
 	# X indicates the input node activation for each input image and Y indicates the required output node activation indicating the image array for the required class
 	X, Y = processInput(narray)
 	
+	## Free narray since it is not required anymore
+	narray = None
+	
 	# Set the NN hidden layer structure
 	hidden_layer_array = [2700]
 	
 	# Train the NN model with the required parameters
 	nn = nl.NN()
-	nn.train(X, Y, hidden_layer_array, learning_rate=0.1, number_of_output_nodes=len(Y[0]), total_iterations=50000, print_error_iters=10, saveAtInterval=True, forceTrain=True)
+	nn.train(X, Y, hidden_layer_array, learning_rate=0.1, number_of_output_nodes=len(Y[0]), total_iterations=50000, print_error_iters=10, min_cost=0.5, saveAtInterval=True, forceTrain=True)
 	
 	validate_test()
 	return nn
@@ -129,7 +132,7 @@ def validate_test() :
 	img_class_dict = getImageClassDict()
 		
 	# Read trained model
-	testNN = nl.NN().readNNModel('temp_data.pkl')
+	testNN = nl.NN().readNNModel('model.pkl')
 	
 	captcha_value_list = []
 
@@ -229,7 +232,7 @@ def validate_train(testNN) :
 	
 	# Read trained model
 	if testNN is None:
-		testNN = nl.NN().readNNModel('temp_data.pkl')
+		testNN = nl.NN().readNNModel('model.pkl')
 	
 	captcha_value_list = []
 
@@ -330,7 +333,7 @@ def test(trained_model, png_file) :
 		
 	# Read trained model
 	if trained_model is None :
-		trained_model = nl.NN().readNNModel('temp_data.pkl')
+		trained_model = nl.NN().readNNModel('model.pkl.pkl')
 		
 	# Read image
 	print("Reading image file ", png_file)

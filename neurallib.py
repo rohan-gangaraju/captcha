@@ -117,7 +117,7 @@ class NN :
 		s_a, s_b = shuffle(a, b, random_state=0)
 		return s_a,s_b
 
-	def train(self, inputX, inputY, hidden_layer_array, learning_rate=0.01, number_of_output_nodes=1, total_iterations=50000, print_error_iters=1000, saveAtInterval=False, forceTrain=False) :
+	def train(self, inputX, inputY, hidden_layer_array, learning_rate=0.01, number_of_output_nodes=1, total_iterations=50000, min_cost=0.5, print_error_iters=1000, saveAtInterval=False, forceTrain=False) :
 
 		#existing_self = self.readNNModel()
 		existing_self = None
@@ -168,10 +168,10 @@ class NN :
 					constant_iterations += print_error_iters
 					
 					
-				if error_percent < 0.1 :
+				if error_percent < min_cost :
 					break
 			
-		#self.saveCurrentObj()
+		self.saveTrimmedObj()
 		return self
 
 	def testInstance(self, test_input) :
@@ -208,13 +208,21 @@ class NN :
 		return self.layers[-1].narray
 
 	def saveCurrentObj(self) :
-		temp_file = 'temp_data.pkl'
-		print("Saving to file ", temp_file)
+		temp_file = 'full_nn_object.pkl'
+		print("Saving full object to file ", temp_file)
 		with open(temp_file, 'wb') as output:
 			#pickle.dump(self, output, 2)
 			dill.dump(self, output)
+			
+	def saveTrimmedObj(self) :
+		model_only = 'model.pkl'
+		print("Saving only synapses to ", model_only)
+		with open(model_only, 'wb') as output:
+			model = NN()
+			model.synapses = self.synapses
+			dill.dump(model, output)
 
-	def readNNModel(self, fileName='temp_data.pkl') :
+	def readNNModel(self, fileName='full_nn_object.pkl') :
 		print("Reading from file ", fileName)
 		try:
 			with open(fileName, 'rb') as input:

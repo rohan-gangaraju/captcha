@@ -1,2 +1,3 @@
 __pycache__/
-temp_data.pkl
+full_nn_object.pkl
+model.pkl

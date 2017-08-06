@@ -204,4 +204,20 @@ Correct     P7CA
 
                         Percentage    : 40.5940594059406
 						
-Min error - 0.1
+Min error - 0.97 - Dataset increased to 750 captchas
+
+Predicted   P7CA
+Correct     P7CA
+
+
+                Single Character
+                        Correct count : 348
+                        Total count   : 404
+
+                        Percentage    : 86.13861386138613
+
+                Captcha
+                        Correct count : 64
+                        Total count   : 101
+
+                        Percentage    : 63.366336633663366
