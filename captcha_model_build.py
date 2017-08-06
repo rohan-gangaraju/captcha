@@ -117,7 +117,7 @@ def train() :
 	nn = nl.NN()
 	nn.train(X, Y, hidden_layer_array, learning_rate=0.1, number_of_output_nodes=len(Y[0]), total_iterations=50000, print_error_iters=10, saveAtInterval=True, forceTrain=True)
 	
-	test()
+	validate_test()
 	return nn
 
 def validate_test() :
@@ -391,6 +391,6 @@ if __name__ == "__main__":
 	elif action == "validate_test" :
 		validate_test()
 	elif action=="test":
-		output_str = test(join("classified","testimages","1000.png"))
+		output_str = test(None, join("classified","testimages","1000.png"))
 		print(output_str)
 		
