@@ -99,6 +99,7 @@ def getImageClassDict() :
 	
 		dill_save_obj(imageClassDictionaryFile, img_class_dict)
 		
+	print("Got image class info")
 	return img_class_dict
 	
 def train() :
@@ -118,7 +119,7 @@ def train() :
 	
 	# Train the NN model with the required parameters
 	nn = nl.NN()
-	nn.train(X, Y, hidden_layer_array, learning_rate=0.1, number_of_output_nodes=len(Y[0]), total_iterations=50000, print_error_iters=10, min_cost=0.5, saveAtInterval=True, forceTrain=True)
+	nn.train(X, Y, hidden_layer_array, learning_rate=0.1, number_of_output_nodes=len(Y[0]), total_iterations=50000, print_error_iters=10, min_cost=1, saveAtInterval=True, forceTrain=True)
 	
 	validate_test()
 	return nn
@@ -232,7 +233,7 @@ def validate_train(testNN) :
 	
 	# Read trained model
 	if testNN is None:
-		testNN = nl.NN().readNNModel('model.pkl')
+		testNN = nl.NN().readNNModel('full_nn_object.pkl')
 	
 	captcha_value_list = []
 

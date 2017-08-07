@@ -242,3 +242,20 @@ Correct     P7CA
 						
 Min error - 0.5 - Dataset increased to 1000 captchas
 
+Error === 0.89   === iterations  790  === Percentage training completed 1.58  === Elapsed time 118.25
+
+Predicted   P7CA
+Correct     P7CA
+
+
+                Single Character
+                        Correct count : 346
+                        Total count   : 400
+
+                        Percentage    : 86.5
+
+                Captcha
+                        Correct count : 66
+                        Total count   : 100
+
+                        Percentage    : 66.0
