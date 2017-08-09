@@ -8,180 +8,145 @@ import csv
 import neurallib as nl
 
 import sys
-#import pdb
 
 import captcha_pre_process as cpp
 
-numdict = { 
-	50: [0,0,0,0,0], 
-	51: [0,0,0,0,1], 
-	52: [0,0,0,1,0], 
-	53: [0,0,0,1,1], 
-	54: [0,0,1,0,0], 
-	55: [0,0,1,0,1], 
-	56: [0,0,1,1,0], 
-	57: [0,0,1,1,1],
-	65: [0,1,0,0,0], 
-	66: [0,1,0,0,1], 
-	67: [0,1,0,1,0], 
-	68: [0,1,0,1,1], 
-	69: [0,1,1,0,0], 
-	70: [0,1,1,0,1], 
-	71: [0,1,1,1,0], 
-	72: [0,1,1,1,1],	
-	75: [1,0,0,0,0], 
-	77: [1,0,0,0,1], 
-	78: [1,0,0,1,0], 
-	80: [1,0,0,1,1], 
-	82: [1,0,1,0,0], 
-	83: [1,0,1,0,1], 
-	84: [1,0,1,1,0], 
-	86: [1,0,1,1,1],
-	87: [1,1,0,0,0], 
-	88: [1,1,0,0,1], 
-	89: [1,1,0,1,0], 
-	90: [1,1,0,1,1]
-	}
-	
+#using dill instead of pickle because it has issues saving large files
+import dill
+
+import time
+
+#np.set_printoptions(threshold=np.inf) #setting this may cause program to hang while trying to print some array
+
 def readFromFile(file) :
 	return np.genfromtxt(file, delimiter=",")
 	
+# helper functions to pickle 
+
+def dill_save_obj(name, obj):
+    with open(name + '.pkl', 'wb') as f:
+        dill.dump(obj, f)
+
+def dill_load_obj(name):
+	pkl_file = name + '.pkl'
+	if exists(pkl_file) :
+		with open(pkl_file, 'rb') as f:
+			return dill.load(f)
+	else :
+		return None
+		
 def processInput(narray) :
-	nColumns = narray.shape[1]
+	'''
+		narray - [50, 0, 0, 0, 1, 1, .....]
+		
+		Need to split the first column, convert the ascii value '50' to a character '2' and get the image array for the character class.
+		
+	'''
+	
+	
 	inputY, inputX = np.split(narray,[1], axis=1)
 
 	modifiedY = []
 
 	for i in range(0,len(inputY)) : 
-		#print(inputY)
-		modifiedY.append(numdict[inputY[i][0]])
+		character = chr(inputY[i]);
+		#print("Instance character : ", character)
 		
-	return inputX, modifiedY
-	
-def train() :
-	narray = readFromFile('processed_input.csv')
-	np.random.shuffle(narray)
-	X, Y = processInput(narray)
-		
-	nn = nl.NN()
-	nn.train(X, Y, learning_rate=0.1, number_of_hidden_layers=1, number_of_hidden_nodes=2700, number_of_output_nodes=5, total_iterations=50000, print_error_iters=10, saveAtInterval=True, forceTrain=True)
-	
-def trainCluster() :
-	narray = readFromFile('processed_input_cluster.csv')
-	np.random.shuffle(narray)
-	X, Y = processInput(narray)
-	hidden_layer_array = [1800]
-	
-	nn = nl.NN()
-	nn.train(X, Y, hidden_layer_array, learning_rate=0.1, number_of_output_nodes=5, total_iterations=50000, print_error_iters=10, saveAtInterval=True, forceTrain=True)
-	return nn
-	
-def test() :
-	test_folder = 'classified\\testimages'
-	testNN = nl.NN().readNNModel('new_model.pkl')
-	
-
-	total_count = 0
-	for file in listdir(test_folder) :
-		full_path = join(test_folder, file)
-		img = cv2.imread(full_path,0)
+		class_img_path = join("classified","image_classes")
+		img = cv2.imread(join(class_img_path, character, "0.png"),0)
 		
 		rows = 60
-		cols = 180
+		cols = 45
 		
-		'''
-		# Code to crop the image to rows,cols
+		dst = cv2.fastNlMeansDenoising(img, None, 45, 7, 21)
+		thresh, im_bw = cv2.threshold(dst, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+
+		bw_array = im_bw.flatten()
 		
-		if img.shape[0] < rows :
-			diff = rows - img.shape[0]
-			zeros = np.zeros((diff,img.shape[1]),dtype=np.uint8)	# zeros uint8 is crucial, otherwise you will just see a black image in imshow . 
-			img = np.r_[img,zeros]
-			print(img[0])
-			#cv2.imshow("i2222222",img)
-		elif img.shape[0] > rows : 
-			img = img[:rows]
-			
-		if img.shape[1] < cols :
-			diff = cols - img.shape[1]
-			zeros = np.zeros((img.shape[0],diff),dtype=np.uint8)
-			img = np.c_[img,zeros]
-			
-		elif img.shape[1] > cols : 
-			img = img[:,:cols]
-			
-		print(img.shape)
-		print(img[0])
-		'''
-		img = cv2.resize(img, (cols,rows))
-			
-		x = np.array_split(img,4,1)
+		bw_array[bw_array > 250] = 1
 		
-		str = ""
-		for i in range(0,4) :
-			#pdb.set_trace()
-			cur_img = x[i]
+		modifiedY.append(bw_array)
+		
+	return inputX, modifiedY
+		
+def getImageClassDict() :
+	imageClassDictionaryFile = "image_class_dictionary"
+	
+	saved_img_class_dict = dill_load_obj(imageClassDictionaryFile)
+	if saved_img_class_dict is not None :
+		return saved_img_class_dict
+		
+	else :
+		img_class_dict = {}
+		
+		train_images_path = join("classified", "image_classes")
+
+		onlyfiles = [f for f in listdir(train_images_path)]
+
+		for file in onlyfiles :
+			img_path = join(train_images_path, file, "0.png");
+			img = cv2.imread(img_path,0)
 			
-			dst = cv2.fastNlMeansDenoising(cur_img, None, 45, 7, 21)
+			dst = cv2.fastNlMeansDenoising(img, None, 45, 7, 21)
 			thresh, im_bw = cv2.threshold(dst, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
 
-			'''
-			kernel1 = np.ones((2,2),np.uint8)
-			kernel2 = np.ones((3,3),np.uint8)
-			close = cv2.erode(cur_img,kernel1,iterations = 1)
-			#dst = cv2.morphologyEx(cur_img, cv2.MORPH_OPEN, kernel)
-			close = cv2.dilate(im_bw,kernel2,iterations = 1)
-			thresh, close = cv2.threshold(close, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
-			'''
-			
 			bw_array = im_bw.flatten()
 			
-			test_array = np.append(bw_array,[1])
+			bw_array[bw_array > 250] = 1
+			bw_array[bw_array < 1] = 0
 			
-			print(test_array)
-			
-			test_array[test_array > 250] = 1
-
-			output = testNN.testInstance(test_array)
-			print(output.round())
-			char = "NULL"
-			for key, value in numdict.items():
-				if np.array_equal(output.round(), value) :
-					char = chr(key)
-				
-			str += char
-			total_count += 1
-			
-			print(char)
-			cv2.imshow("some1",im_bw)
-			cv2.waitKey()
-			
-		print("Predicted ", str)
-		#print(char)
-		cv2.imshow("some",img)
-		cv2.waitKey()
-			
+			img_class_dict[file] = bw_array
+	
+		dill_save_obj(imageClassDictionaryFile, img_class_dict)
 		
-		#input()
+	print("Got image class info")
+	return img_class_dict
 	
-	print ( "correct count " , accuracy_count , " : total_count " , total_count , " percent " , (accuracy_count/total_count)*100)
+def train() :
+	print("Starting training")
 	
-def testCluster() :
-	print("Test cluster")
-	train_folder = 'classified\\testimages'
+	# Read already processed input data
+	narray = readFromFile('processed_input_cluster.csv')
 	
+	# X indicates the input node activation for each input image and Y indicates the required output node activation indicating the image array for the required class
+	X, Y = processInput(narray)
+	
+	## Free narray since it is not required anymore
+	narray = None
+	
+	# Set the NN hidden layer structure
+	hidden_layer_array = [2700]
+	
+	# Train the NN model with the required parameters
+	nn = nl.NN()
+	nn.train(X, Y, hidden_layer_array, learning_rate=0.1, number_of_output_nodes=len(Y[0]), total_iterations=50000, print_error_iters=10, min_cost=1, saveAtInterval=True, forceTrain=True)
+	
+	validate_test()
+	return nn
 
-	testNN = nl.NN().readNNModel('temp_data.pkl')
+def validate_test() :
+	print("Test set validation")
+	
+	train_folder = join("classified", "testimages")
+	
+	# Get the mapping between class character and image array { '2' : [1,0,...], '3' : [0,0,..], ... }
+	img_class_dict = getImageClassDict()
+		
+	# Read trained model
+	testNN = nl.NN().readNNModel('full_nn_object.pkl')
 	
 	captcha_value_list = []
 
-	with open("classified\\testclass.txt","r") as classFile:
+	testclass_path = join("classified", "testclass.txt")
+	with open(testclass_path,"r") as classFile:
 		for line in classFile:
 			captcha_value_list.append(line.strip())
 	
-	
-	accuracy_count = 0
-	total_count = 0
+	char_correct_count = 0
+	char_total_count = 0
 	captcha_correct_count = 0
+	captcha_total_count = 0
+		
 	for file in listdir(train_folder) :
 		#print("=========== Test Image : ", file)
 		index = int((file.split('.'))[0])-1000
@@ -192,8 +157,8 @@ def testCluster() :
 
 		captcha_str = ""
 		
+		# Divide the 4 character captcha into each character and use the NN model to predict each character
 		for i in range(0,4) :
-			#pdb.set_trace()
 			cur_img = x[i]			
 			
 			bw_array = cur_img.flatten()
@@ -201,139 +166,88 @@ def testCluster() :
 			test_array = np.append(bw_array,[1])
 			
 			test_array[test_array > 0] = 1
-
+			
+			# Predict the output character using the NN model
 			output = testNN.testInstance(test_array)
 			
-			#print(output.round())
-			char = "NULL"
-			for key, value in numdict.items():
-				if np.array_equal(output.round(), value) :
-					char = chr(key)
+			output[output < 1] = 0
+			
+			match_sum = 0
+			output_char = "NULL"
+
+			# Simple array comparison between predicted output activation array and the image class array which is already collected the image dict
+			for key,value in img_class_dict.items() :
+				match_count = np.sum(output == value)
+				if match_count > match_sum :
+					output_char = key
+					match_sum = match_count
+
+			'''
+				# Uncomment to see the character image that is generated using the NN model
 				
-			captcha_str += char
-			if char == captcha_value_list[index][i] :
+				output[output == 1] = 255
+				img = np.reshape(output, (60,45))
+				cv2.imshow("some", img)
+				cv2.waitKey()
+			'''
+			
+			captcha_str += output_char
+			if output_char == captcha_value_list[index][i] :
 			#	print("correct")
-				accuracy_count += 1
+				char_correct_count += 1
 				
-			total_count += 1
+			char_total_count += 1
 			
 		print("Predicted  " , captcha_str)
 		print("Correct    " , captcha_value_list[index])
+
+		captcha_total_count +=1
 		
 		if captcha_str == captcha_value_list[index] :
 			captcha_correct_count += 1
-		#print(char)
-		#cv2.imshow("some",img)
-		#cv2.waitKey()
-			
 		
-		#input()
-	
-		print ( "char correct count " , accuracy_count , " : char total_count " , total_count , " captcha correct count ", captcha_correct_count, " percent " , (accuracy_count/total_count)*100)
-	
-	
-def validateModel() :
-	train_folder = 'classified\\fullimages'
-	testNN = nl.NN().readNNModel('new_model.pkl')
-	
-	captcha_value_list = []
+		summary_string = """
+		
+		Single Character 
+			Correct count : %s
+			Total count   : %s
 
-	with open("classified\\class.txt","r") as classFile:
-		for line in classFile:
-			captcha_value_list.append(line.strip())
-	
-	
-	accuracy_count = 0
-	total_count = 0
-	for file in listdir(train_folder) :
-		print("=========== Test Image : ", file)
-		index = int((file.split('.'))[0])-1
-		full_path = join(train_folder, file)
-		img = cv2.imread(full_path,0)
+			Percentage    : %s
+			
+		Captcha
+			Correct count : %s
+			Total count   : %s		
 		
-		rows = 60
-		cols = 180
+			Percentage    : %s
+		""" % (char_correct_count, char_total_count, (char_correct_count/char_total_count)*100, captcha_correct_count, captcha_total_count, (captcha_correct_count/captcha_total_count)*100)
 		
-		'''
-		# Code to crop the image to rows,cols
-		
-		if img.shape[0] < rows :
-			diff = rows - img.shape[0]
-			zeros = np.zeros((diff,img.shape[1]),dtype=np.uint8)	# zeros uint8 is crucial, otherwise you will just see a black image in imshow . 
-			img = np.r_[img,zeros]
-			print(img[0])
-			#cv2.imshow("i2222222",img)
-		elif img.shape[0] > rows : 
-			img = img[:rows]
-			
-		if img.shape[1] < cols :
-			diff = cols - img.shape[1]
-			zeros = np.zeros((img.shape[0],diff),dtype=np.uint8)
-			img = np.c_[img,zeros]
-			
-		elif img.shape[1] > cols : 
-			img = img[:,:cols]
-			
-		print(img.shape)
-		print(img[0])
-		'''
-		img = cv2.resize(img, (cols,rows))
-			
-		x = np.array_split(img,4,1)
-		
-		for i in range(0,4) :
-			#pdb.set_trace()
-			cur_img = x[i]
-			
-			dst = cv2.fastNlMeansDenoising(cur_img, None, 45, 7, 21)
-			thresh, im_bw = cv2.threshold(dst, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
-			bw_array = im_bw.flatten()
-			
-			test_array = np.append(bw_array,[1])
-			
-			#print(test_array)
-			
-			test_array[test_array > 250] = 1
+		print (summary_string)
 
-			output = testNN.testInstance(test_array)
-			#print(output.round())
-			char = "NULL"
-			for key, value in numdict.items():
-				if np.array_equal(output.round(), value) :
-					char = chr(key)
-					
-			if char == captcha_value_list[index][i] :
-			#	print("correct")
-				accuracy_count += 1
-				
-			total_count += 1
-			
-		#print(char)
-		#cv2.imshow("some",img)
-		#cv2.waitKey()
-			
+def validate_train(testNN) :
+	print("Validate training set")
+	
+	# Get the mapping between class character and image array { '2' : [1,0,...], '3' : [0,0,..], ... }
+	img_class_dict = getImageClassDict()
 		
-		#input()
+	train_folder = join("classified", "fullimages")
 	
-	print ( "correct count " , accuracy_count , " : total_count " , total_count , " percent " , (accuracy_count/total_count)*100)
-	
-def validateCluster(testNN) :
-	print("Validating")
-	train_folder = 'classified\\fullimages'
-	
+	# Read trained model
 	if testNN is None:
-		testNN = nl.NN().readNNModel('temp_data.pkl')
+		testNN = nl.NN().readNNModel('full_nn_object.pkl')
 	
 	captcha_value_list = []
 
-	with open("classified\\class.txt","r") as classFile:
+	class_file = join("classified", "class.txt")
+	with open(class_file,"r") as classFile:
 		for line in classFile:
 			captcha_value_list.append(line.strip())
 	
 	
-	accuracy_count = 0
-	total_count = 0
+	char_correct_count = 0
+	char_total_count = 0
 	captcha_correct_count = 0
+	captcha_total_count = 0	
+
 	for file in listdir(train_folder) :
 		#print("=========== Test Image : ", file)
 		index = int((file.split('.'))[0])-1
@@ -344,8 +258,8 @@ def validateCluster(testNN) :
 
 		captcha_str = ""
 		
+		# Divide the 4 character captcha into each character and use the NN model to predict each character
 		for i in range(0,4) :
-			#pdb.set_trace()
 			cur_img = x[i]			
 			
 			bw_array = cur_img.flatten()
@@ -353,177 +267,134 @@ def validateCluster(testNN) :
 			test_array = np.append(bw_array,[1])
 			
 			test_array[test_array > 0] = 1
-
+			
+			# Predict the output character using the NN model
 			output = testNN.testInstance(test_array)
 			
-			#print(output.round())
-			char = "NULL"
-			for key, value in numdict.items():
-				if np.array_equal(output.round(), value) :
-					char = chr(key)
+			output[output < 1] = 0
+			
+			match_sum = 0
+			output_char = "NULL"
+
+			# Simple array comparison between predicted output activation array and the image class array which is already collected the image dict
+			for key,value in img_class_dict.items() :
+				match_count = np.sum(output == value)
+				if match_count > match_sum :
+					output_char = key
+					match_sum = match_count
+
+			'''
+				# Uncomment to see the character image that is generated using the NN model
 				
-			captcha_str += char
-			if char == captcha_value_list[index][i] :
+				output[output == 1] = 255
+				img = np.reshape(output, (60,45))
+				cv2.imshow("some", img)
+				cv2.waitKey()
+			'''
+			
+			captcha_str += output_char
+			if output_char == captcha_value_list[index][i] :
 			#	print("correct")
-				accuracy_count += 1
+				char_correct_count += 1
 				
-			total_count += 1
+			char_total_count += 1
 			
 		print("Predicted  " , captcha_str)
 		print("Correct    " , captcha_value_list[index])
+
+		captcha_total_count +=1
 		
 		if captcha_str == captcha_value_list[index] :
 			captcha_correct_count += 1
-		#print(char)
-		#cv2.imshow("some",img)
-		#cv2.waitKey()
-			
 		
-		#input()
-	
-		print ( "char correct count " , accuracy_count , " : char total_count " , total_count , " captcha correct count ", captcha_correct_count, " percent " , (accuracy_count/total_count)*100)
-	
-def validateModelAgainstTrainingSet() :
-	testNN = nl.NN().readNNModel('model_99.pkl')
-	
-	captcha_value_list = []
+		summary_string = """
+		
+		Single Character 
+			Correct count : %s
+			Total count   : %s
 
-	with open("classified\\class.txt","r") as classFile:
-		for line in classFile:
-			captcha_value_list.append(line.strip())
+			Percentage    : %s
+			
+		Captcha
+			Correct count : %s
+			Total count   : %s		
+		
+			Percentage    : %s
+		""" % (char_correct_count, char_total_count, (char_correct_count/char_total_count)*100, captcha_correct_count, captcha_total_count, (captcha_correct_count/captcha_total_count)*100)
+		
+		print (summary_string)
+		
+def test(trained_model, png_file) :
+	start_time = time.perf_counter()
+	print("Classify using trained model")
 	
-	accuracy_count = 0
-	total_count = 0
-	#train_folder = 'C:\\Users\\Administrator\\Desktop\\pyscripts\\captcha\\classified\\testimages'
-	train_folder = 'classified\\fullimages'
-	for file in listdir(train_folder) :
-		print("File ", file)
-		index = int((file.split('.'))[0])-1
+	# Get the mapping between class character and image array { '2' : [1,0,...], '3' : [0,0,..], ... }
+	# Since we do not want to get this information from the images again, assuming that this pickle file is already present
+	img_class_dict = getImageClassDict()
 		
-		full_path = join(train_folder, file)
-		img = cv2.imread(full_path,0)
+	# Read trained model
+	if trained_model is None :
+		trained_model = nl.NN().readNNModel('model.pkl.pkl')
 		
-		rows = 60
-		cols = 180
+	# Read image
+	print("Reading image file ", png_file)
+	img = cv2.imread(png_file,0)
 	
-			
-		if img.shape[0] < rows :
-			diff = rows - img.shape[0]
-			zeros = np.zeros((diff,img.shape[1]),dtype=np.uint8)	# zeros uint8 is crucial, otherwise you will just see a black image in imshow . 
-			img = np.r_[img,zeros]
-		elif img.shape[0] > rows : 
-			img = img[:rows]
-			
-		if img.shape[1] < cols :
-			diff = cols - img.shape[1]
-			zeros = np.zeros((img.shape[0],diff),dtype=np.uint8)
-			img = np.c_[img,zeros]
-			
-		elif img.shape[1] > cols : 
-			img = img[:,:cols]
-			
-		x = np.array_split(img,4,1)
-		
-		for i in range(0,4) :
-			#pdb.set_trace()
-			cur_img = x[i]
-			
-			dst = cv2.fastNlMeansDenoising(cur_img, None, 45, 7, 21)
-			thresh, im_bw = cv2.threshold(dst, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
-			bw_array = im_bw.flatten()
-			
-			test_array = np.append(bw_array,[1])
-			
-			print(test_array)
-			
-			test_array[test_array > 250] = 1
+	x = cpp.splitImage(img)
 
-			output = testNN.testInstance(test_array)
-			print(output.round())
-			char = "NULL"
-			for key, value in numdict.items():
-				if np.array_equal(output.round(), value) :
-					char = chr(key)
+	captcha_str = ""
+	
+	# Divide the 4 character captcha into each character and use the NN model to predict each character
+	for i in range(0,4) :
+		cur_img = x[i]			
+		
+		bw_array = cur_img.flatten()
+		
+		test_array = np.append(bw_array,[1])
+		
+		test_array[test_array > 0] = 1
+		
+		# Predict the output character using the NN model
+		output = trained_model.testInstance(test_array)
+		
+		output[output < 1] = 0
+		
+		match_sum = 0
+		output_char = "NULL"
+
+		# Simple array comparison between predicted output activation array and the image class array which is already collected the image dict
+		for key,value in img_class_dict.items() :
+			match_count = np.sum(output == value)
+			if match_count > match_sum :
+				output_char = key
+				match_sum = match_count
+
+		'''
+			# Uncomment to see the character image that is generated using the NN model
 			
-			print("predicted value ", char)
-			print("correct value ", captcha_value_list[index][i])
-			
-			if char == captcha_value_list[index][i] :
-				accuracy_count += 1
-			
-			print(char)
-			total_count += 1
-			cv2.imshow("some",im_bw)
+			output[output == 1] = 255
+			img = np.reshape(output, (60,45))
+			cv2.imshow("some", img)
 			cv2.waitKey()
-			
-
-			print ( "correct count " , accuracy_count , " : total_count " , total_count , " percent " , (accuracy_count/total_count)*100)
-		#input()
-	
-	
-def validateModelAgainstDividedTrainingSet() :
-	testNN = nl.NN().readNNModel('model_99.pkl')
-	
-
-	train_folder = 'classified\\divided'
-	#train_folder = 'C:\\Users\\Administrator\\Desktop\\pyscripts\\captcha\\images'
-	
-	for folder in listdir(train_folder) :
-		classfolder = join(train_folder, folder)
+		'''
 		
-		for file in listdir(classfolder) :
-			full_path = join(classfolder, file)
-			img = cv2.imread(full_path,0)
-			
-			rows = 60
-			cols = 180
+		captcha_str += output_char
 		
-			cur_img = img
-				
-			dst = cv2.fastNlMeansDenoising(cur_img, None, 45, 7, 21)
-			thresh, im_bw = cv2.threshold(dst, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
-			bw_array = im_bw.flatten()
-			
-			test_array = np.append(bw_array,[1])
-				
-			print(test_array)
-			
-			test_array[test_array > 250] = 1
-
-			output = testNN.testInstance(test_array)
-			
-			print(output.round())
-			char = "NULL"
-			for key, value in numdict.items():
-				if np.array_equal(output.round(), value) :
-					char = chr(key)
-					
-			print("Predicted character " , char)
-			cv2.imshow("some",im_bw)
-			cv2.waitKey()
-			
-			
-			#input()
+	elapsed_time = time.perf_counter() - start_time
+	print("time to classify : %0.2f " % elapsed_time)
 	
-	
+	return captcha_str
+		
 if __name__ == "__main__":
 	action = sys.argv[1]
-	print(action)
+	#print(action)
 	if action == "train" :
 		train()
-	elif action == "traincluster" :
-		testnn = trainCluster()
-		validateModelCluster(testnn)
-	elif action == "validate":
-		#test()
-		#validateModelAgainstTrainingSet()
-		validateModel()
-		#validateModelAgainstDividedTrainingSet()
-	elif action == "test" :
-		test()
-	elif action == "testcluster" :
-		testCluster()
-	elif action == "validatecluster" :
-		validateCluster(None)
-	
-	
+	elif action == "validate_train":
+		validate_train(None)
+	elif action == "validate_test" :
+		validate_test()
+	elif action=="test":
+		output_str = test(None, join("classified","testimages","1000.png"))
+		print(output_str)
+		

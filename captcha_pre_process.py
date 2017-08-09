@@ -5,6 +5,7 @@ import cv2
 
 from os import listdir, makedirs
 from os.path import join,isfile,exists
+from shutil import rmtree
 
 import base64
 
@@ -44,8 +45,9 @@ def convertBase64ToPng() :
 				data = line.strip().split(',')
 				#print(data[1])
 				
-				path = "images\\"
-				file = path + str(i) + ".png"
+				path = "images"
+				pngfile = str(i) + ".png"
+				file = join(path, pngfile)
 				print(file)
 				with open(file, "wb") as fh:
 					fh.write(base64.b64decode(data[1]))
@@ -55,7 +57,7 @@ def convertBase64ToPng() :
 # Method to read entire captcha image, filter and split it into 4 parts and save the images under respective character folder based on the class.txt file which contains the classification details
 def saveClassfiedImages() :
 	# Path of classified images
-	parent_path = 'classified\\'
+	parent_path = 'classified'
 
 	captcha_value_list = []
 
@@ -115,7 +117,7 @@ def saveClassfiedImages() :
 		print(captcha_value_list[index][0], captcha_value_list[index][1], captcha_value_list[index][2], captcha_value_list[index][3])
 		
 		for i in range(0,4) :
-			directory = join(parent_path,'divided\\',captcha_value_list[index][i])
+			directory = join(parent_path,'divided',captcha_value_list[index][i])
 			if not exists(directory):
 				makedirs(directory)
 				
@@ -202,7 +204,10 @@ def splitImage(image) :
 
 def saveClassfiedImagesCluster() :
 	# Path of classified images
-	parent_path = 'classified\\'
+	parent_path = 'classified'
+	
+	# Remove existing divided files
+	rmtree(join(parent_path,'dividedCluster'))
 
 	captcha_value_list = []
 
@@ -227,7 +232,7 @@ def saveClassfiedImagesCluster() :
 		split_images = splitImage(img)
 		
 		for i in range(0,4) :
-			directory = join(parent_path,'dividedCluster\\',captcha_value_list[index][i])
+			directory = join(parent_path,'dividedCluster',captcha_value_list[index][i])
 			if not exists(directory):
 				makedirs(directory)
 				
