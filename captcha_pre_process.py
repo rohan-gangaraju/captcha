@@ -57,7 +57,7 @@ def convertBase64ToPng() :
 # Method to read entire captcha image, filter and split it into 4 parts and save the images under respective character folder based on the class.txt file which contains the classification details
 def saveClassfiedImages() :
 	# Path of classified images
-	parent_path = 'classified'
+	parent_path = 'resources'
 
 	captcha_value_list = []
 
@@ -65,7 +65,7 @@ def saveClassfiedImages() :
 		for line in classFile:
 			captcha_value_list.append(line.strip())
 
-	onlyfiles = [f for f in listdir(join(parent_path,'fullimages')) if isfile(join(parent_path,'fullimages', f))]
+	onlyfiles = [f for f in listdir(join(parent_path,'training_captcha_images')) if isfile(join(parent_path,'training_captcha_images', f))]
 
 	print(onlyfiles)
 
@@ -74,7 +74,7 @@ def saveClassfiedImages() :
 
 	for file in onlyfiles:
 		print("File -------------->" , file)
-		full_path = join(parent_path,'fullimages',file)
+		full_path = join(parent_path,'training_captcha_images',file)
 		index, png = file.split('.')
 		index = int(index) - 1
 		img = cv2.imread(full_path,0)
@@ -117,7 +117,7 @@ def saveClassfiedImages() :
 		print(captcha_value_list[index][0], captcha_value_list[index][1], captcha_value_list[index][2], captcha_value_list[index][3])
 		
 		for i in range(0,4) :
-			directory = join(parent_path,'divided',captcha_value_list[index][i])
+			directory = join(parent_path,'training_set_fixed_segmentation',captcha_value_list[index][i])
 			if not exists(directory):
 				makedirs(directory)
 				
@@ -204,10 +204,10 @@ def splitImage(image) :
 
 def saveClassfiedImagesCluster() :
 	# Path of classified images
-	parent_path = 'classified'
+	parent_path = 'resources'
 	
 	# Remove existing divided files
-	rmtree(join(parent_path,'dividedCluster'))
+	rmtree(join(parent_path,'training_set_kmeans_segmentation'))
 
 	captcha_value_list = []
 
@@ -215,7 +215,7 @@ def saveClassfiedImagesCluster() :
 		for line in classFile:
 			captcha_value_list.append(line.strip())
 
-	onlyfiles = [f for f in listdir(join(parent_path,'fullimages')) if isfile(join(parent_path,'fullimages', f))]
+	onlyfiles = [f for f in listdir(join(parent_path,'training_captcha_images')) if isfile(join(parent_path,'training_captcha_images', f))]
 
 	#print(onlyfiles)
 
@@ -224,7 +224,7 @@ def saveClassfiedImagesCluster() :
 
 	for file in onlyfiles:
 		print("File -------------->" , file)
-		full_path = join(parent_path,'fullimages',file)
+		full_path = join(parent_path,'training_captcha_images',file)
 		index, png = file.split('.')
 		index = int(index) - 1
 		img = cv2.imread(full_path,0)
@@ -232,7 +232,7 @@ def saveClassfiedImagesCluster() :
 		split_images = splitImage(img)
 		
 		for i in range(0,4) :
-			directory = join(parent_path,'dividedCluster',captcha_value_list[index][i])
+			directory = join(parent_path,'training_set_kmeans_segmentation',captcha_value_list[index][i])
 			if not exists(directory):
 				makedirs(directory)
 				

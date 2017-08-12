@@ -52,7 +52,7 @@ def processInput(narray) :
 		character = chr(inputY[i]);
 		#print("Instance character : ", character)
 		
-		class_img_path = join("classified","image_classes")
+		class_img_path = join("resources","training_captcha_class")
 		img = cv2.imread(join(class_img_path, character, "0.png"),0)
 		
 		rows = 60
@@ -79,7 +79,7 @@ def getImageClassDict() :
 	else :
 		img_class_dict = {}
 		
-		train_images_path = join("classified", "image_classes")
+		train_images_path = join("resources", "training_captcha_class")
 
 		onlyfiles = [f for f in listdir(train_images_path)]
 
@@ -106,7 +106,7 @@ def train() :
 	print("Starting training")
 	
 	# Read already processed input data
-	narray = readFromFile('processed_input_cluster.csv')
+	narray = readFromFile('training_data.csv')
 	
 	# X indicates the input node activation for each input image and Y indicates the required output node activation indicating the image array for the required class
 	X, Y = processInput(narray)
@@ -127,7 +127,7 @@ def train() :
 def validate_test() :
 	print("Test set validation")
 	
-	train_folder = join("classified", "testimages")
+	train_folder = join("resources", "test_captcha_images")
 	
 	# Get the mapping between class character and image array { '2' : [1,0,...], '3' : [0,0,..], ... }
 	img_class_dict = getImageClassDict()
@@ -137,7 +137,7 @@ def validate_test() :
 	
 	captcha_value_list = []
 
-	testclass_path = join("classified", "testclass.txt")
+	testclass_path = join("resources", "testclass.txt")
 	with open(testclass_path,"r") as classFile:
 		for line in classFile:
 			captcha_value_list.append(line.strip())
@@ -229,7 +229,7 @@ def validate_train(testNN) :
 	# Get the mapping between class character and image array { '2' : [1,0,...], '3' : [0,0,..], ... }
 	img_class_dict = getImageClassDict()
 		
-	train_folder = join("classified", "fullimages")
+	train_folder = join("resources", "training_captcha_class")
 	
 	# Read trained model
 	if testNN is None:
@@ -237,7 +237,7 @@ def validate_train(testNN) :
 	
 	captcha_value_list = []
 
-	class_file = join("classified", "class.txt")
+	class_file = join("resources", "class.txt")
 	with open(class_file,"r") as classFile:
 		for line in classFile:
 			captcha_value_list.append(line.strip())
@@ -395,6 +395,6 @@ if __name__ == "__main__":
 	elif action == "validate_test" :
 		validate_test()
 	elif action=="test":
-		output_str = test(None, join("classified","testimages","1000.png"))
+		output_str = test(None, join("resources","test_captcha_images","1000.png"))
 		print(output_str)
 		
