@@ -229,7 +229,7 @@ def validate_train(testNN) :
 	# Get the mapping between class character and image array { '2' : [1,0,...], '3' : [0,0,..], ... }
 	img_class_dict = getImageClassDict()
 		
-	train_folder = join("resources", "training_captcha_class")
+	train_folder = join("resources", "training_captcha_images")
 	
 	# Read trained model
 	if testNN is None:
